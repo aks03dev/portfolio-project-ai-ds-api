@@ -28,7 +28,7 @@ class SWCClient:
     GET_COUNTS_ENDPOINT = "/v0/counts/"
 
     BULK_FILE_BASE_URL = (
-        "https://raw.githubusercontent.com/[github ID]"
+        "https://raw.githubusercontent.com/aks03dev"
         + "/portfolio-project/main/bulk/"
     )
 
@@ -284,17 +284,24 @@ class SWCClient:
 
 #bulk endpoints
 
-    def get_bulk_player_file(self) -> bytes:
+    def get_bulk_player_file(self, file_path: str = None) -> bytes | None:
         """Returns a bulk file with player data"""
 
         logger.debug("Entered get bulk player file")
 
-        player_file_path = self.BULK_FILE_BASE_URL + self.BULK_FILE_NAMES["players"]
+        player_file_url = self.BULK_FILE_BASE_URL + self.BULK_FILE_NAMES["players"]
 
-        response = httpx.get(player_file_path, follow_redirects=True)
+        response = httpx.get(player_file_url, follow_redirects=True)
 
         if response.status_code == 200:
             logger.debug("File downloaded successfully")
+            if file_path:
+                # Create the directory if it doesn't exist
+                import os
+                os.makedirs(os.path.dirname(file_path), exist_ok=True)
+                with open(file_path, "wb") as f:
+                    f.write(response.content)
+                return None
             return response.content
 
     def get_bulk_league_file(self) -> bytes:
